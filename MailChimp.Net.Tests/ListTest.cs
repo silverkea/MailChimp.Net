@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ListTest.cs" company="Brandon Seydel">
 //   N/A
 // </copyright>
@@ -10,6 +10,7 @@ using MailChimp.Net.Models;
 using Xunit;
 using MailChimp.Net.Core;
 using System;
+using System.Collections.Generic;
 
 namespace MailChimp.Net.Tests
 {
@@ -55,6 +56,24 @@ namespace MailChimp.Net.Tests
             return list;
         }
 
+        /// <summary>
+        /// The should_ create_ new_ Gdpr_ list.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        [Fact]
+        public async Task<List> Should_Create_New_Gdpr_List()
+        {
+            //Clear out all the lists
+            await this.Should_Delete_All_Lists();
+
+            var list = await this.MailChimpManager.Configure((mo) => mo.Limit = 10).Lists.AddOrUpdateAsync(this.GetGdprMailChimpList()).ConfigureAwait(false);
+
+            var allLists = await this.MailChimpManager.Lists.GetAllAsync().ConfigureAwait(false);
+            Assert.True(allLists.Any());
+            return list;
+        }
 
         /// <summary>
         /// The should_ return_ lists.
@@ -116,5 +135,33 @@ namespace MailChimp.Net.Tests
             Assert.Equal(updatedList.Name, newList.Name);
         }
 
+        [Fact]
+        public async Task Should_Batch_List_Update_Name()
+        {
+            var newList = await this.Should_Create_New_List().ConfigureAwait(false);
+            var testEmail = $"test{Guid.NewGuid()}@yandex.ru";
+
+            var updatedList = await this.MailChimpManager.Lists.BatchAsync(new BatchList()
+            {
+                Members = new List<Member>()
+                {
+                    new Member()
+                    {
+                        EmailAddress = testEmail,
+                        Status = Status.Subscribed,
+                        StatusIfNew = Status.Subscribed
+                    },
+                    new Member()
+                    {
+                        EmailAddress = $"test{Guid.NewGuid()}@yandex.ru",
+                        Status = Status.Unsubscribed,
+                        StatusIfNew = Status.Unsubscribed
+                    },
+                },
+                UpdateExisting = false
+            }, newList.Id);
+
+            Assert.True(updatedList.NewMembers.Any(x => x.EmailAddress == testEmail));
+        }
     }
 }

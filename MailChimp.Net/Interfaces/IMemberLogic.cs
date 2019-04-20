@@ -28,7 +28,7 @@ namespace MailChimp.Net.Interfaces
 		/// <returns>
 		/// The <see cref="Task"/>.
 		/// </returns>
-		Task<Member> AddOrUpdateAsync(string listId, Member member);
+		Task<Member> AddOrUpdateAsync(string listId, Member member, IList<MarketingPermissionText> marketingPermissions = null);
         
 	    /// <summary>
 	    /// Search the account or a specific list for members that match the specified query terms.
@@ -53,7 +53,20 @@ namespace MailChimp.Net.Interfaces
         /// </returns>
         Task DeleteAsync(string listId, string emailAddressOrHash);
 
-
+        /// <summary>
+        /// The permanent delete async.
+        /// </summary>
+        /// <param name="listId">
+        /// The list id.
+        /// </param>
+        /// <param name="emailAddressOrHash">
+        /// The email address.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        Task PermanentDeleteAsync(string listId, string emailAddressOrHash);
+		
 		/// <summary>
 		/// Gets the activities for a specific list
 		/// </summary>
